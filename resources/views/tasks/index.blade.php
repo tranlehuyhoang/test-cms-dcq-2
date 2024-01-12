@@ -118,9 +118,19 @@
                                                                     
 
                                                                     ?>
-                                                            <tr id="child_{{ $value['id'] }}">
-                                                                <td><span class="ms-0">
-                                                                        {!! $value['hasChildren'] ? '<i class="fe-chevron-right" id="' . $value['id'] . '"></i>' : '' !!}
+                                                            <tr id="child_{{ $value['id'] }}"
+                                                                class="child_tasks_<?php echo $value['parent_id']; ?>">
+                                                                <td>
+                                                                    <span class="ms-0">
+                                                                        {!! $value['hasChildren']
+                                                                            ? '<i class="fe-chevron-right" onclick="showChildTasks(this, ' .
+                                                                                "'" .
+                                                                                $value['id'] .
+                                                                                "'" .
+                                                                                ')" id="' .
+                                                                                $value['id'] .
+                                                                                '"></i>'
+                                                                            : '' !!}
                                                                     </span>
                                                                     <label class="form-check-label <?php echo $classStatus; ?>"
                                                                         for="tasktodayCheck01">#<?php echo $value['id']; ?></label>
@@ -199,50 +209,39 @@
                                     </div>
 
                                     <script>
-                                        $(document).ready(function() {
-                                            $('i.fe-chevron-right').click(function() {
-                                                var id = $(this).attr('id');
+                                        showChildTasks = function(element, id) {
 
-                                                var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                                                var element = $('i.fe-chevron-right#' + id);
-                                                if (element.length > 0) {
+                                            var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                                            var element = $('i.fe-chevron-right#' + id);
 
-                                                    $.ajax({
-                                                        url: '{{ route('task.get_child_tasks') }}',
-                                                        method: 'POST',
-                                                        data: {
-                                                            id: id,
-                                                            _token: '{{ csrf_token() }}' // Thêm mã CSRF vào yêu cầu
-                                                        },
-                                                        success: function(response) {
-                                                            var child_tasks = response.html;
-                                                            $('#child_' + id).after(child_tasks);
+                                            if (element.hasClass('fe-chevron-right')) {
+                                                $.ajax({
+                                                    url: '{{ route('task.get_child_tasks') }}',
+                                                    method: 'POST',
+                                                    data: {
+                                                        id: id,
+                                                        _token: '{{ csrf_token() }}' // Thêm mã CSRF vào yêu cầu
+                                                    },
+                                                    success: function(response) {
+                                                        var child_tasks = response.html;
+                                                        $('#child_' + id).after(child_tasks);
 
-                                                            element.removeClass('fe-chevron-right').addClass('fe-chevron-down');
-                                                        },
-                                                        error: function(xhr, status, error) {
-                                                            // Xử lý lỗi
-                                                            console.error(error);
-                                                        }
-                                                    });
-                                                } else {
-                                                    console.log('object')
-                                                    $('tr#child_tasks_' + id).remove();
-                                                    var element = $('i.fe-chevron-down#' + id);
+                                                        element.removeClass('fe-chevron-right').addClass('fe-chevron-down');
+                                                    },
+                                                    error: function(xhr, status, error) {
+                                                        // Xử lý lỗi
+                                                        console.error(error);
+                                                    }
+                                                });
+                                            } else {
+                                                var element = $('i.fe-chevron-down#' + id);
 
-                                                    element.removeClass('fe-chevron-down').addClass('fe-chevron-right');
-                                                }
+                                                $('tr.child_tasks_' + id).remove();
+                                                element.removeClass('fe-chevron-down').addClass('fe-chevron-right');
 
-                                            });
-                                        });
-                                        $(document).ready(function() {
-                                            console.log('object')
-                                            $('i.fe-chevron-down').click(function() {
-                                                $(this).removeClass('fe-chevron-down').addClass('fe-chevron-right');
+                                            }
 
-
-                                            });
-                                        });
+                                        }
                                     </script>
 
                                 </div>

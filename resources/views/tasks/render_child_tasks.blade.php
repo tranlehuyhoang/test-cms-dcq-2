@@ -19,11 +19,19 @@ foreach ($arTasks as $key => $value) {
     
 
     ?>
- <tr id="child_tasks_<?php echo $value['parent_id']; ?>">
+ <tr id="child_{{ $value['id'] }}" class="child_tasks_<?php echo $value['parent_id']; ?>">
 
-     <td>
-         <span class="ms-0">
-             {!! $value['hasChildren'] ? '<i class="fe-chevron-right" id="' . $value['id'] . '"></i>' : '' !!}
+     <td style="">
+         <span class="ms-0" style="padding-left: 50px">
+             {!! $value['hasChildren']
+                 ? '<i class="fe-chevron-right" onclick="showChildTasks(this, ' .
+                     "'" .
+                     $value['id'] .
+                     "'" .
+                     ')" id="' .
+                     $value['id'] .
+                     '"></i>'
+                 : '' !!}
          </span>
          <label class="form-check-label <?php echo $classStatus; ?>" for="tasktodayCheck01">#<?php echo $value['id']; ?></label>
      </td>
