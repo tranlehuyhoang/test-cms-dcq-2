@@ -19,10 +19,14 @@ foreach ($arTasks as $key => $value) {
     
 
     ?>
- <tr id="child_{{ $value['id'] }}" class="child_tasks_<?php echo $value['parent_id']; ?>">
+ <tr id="child_{{ $value['id'] }}"
+     class="child_tasks_{{ $value['parent_id'] }} child_tasks_level_{{ $value['level'] }}
+@foreach ($value['parentIds'] as $parentId)
+    child_tasks_{{ $parentId }} @endforeach
+">
 
      <td style="">
-         <span class="ms-0" style="padding-left: 50px">
+         <span class="ms-<?php echo $value['level']; ?>" style="padding-left: <?php echo $value['level'] * 50; ?>px;">
              {!! $value['hasChildren']
                  ? '<i class="fe-chevron-right" onclick="showChildTasks(this, ' .
                      "'" .

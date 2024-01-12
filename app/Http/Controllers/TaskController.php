@@ -24,14 +24,7 @@ class TaskController extends BaseController
 	{
 		$user = Auth::user();
 
-		$data['arRoles'] = Roles::whereIn('code', array(User::ADMIN, User::MANAGER))->get()->pluck('name', 'id')->toArray();
-
-		// if (in_array($user->role_id, array_keys($data['arRoles']))) {
-		// 	$data['arTasks'] = Tasks::with('tasksAssignTo')->with('tasksCreatedBy')->with('tasksApprovedBy')->where('parent_id', '=', 0)->get()->keyBy('id')->toArray();
-		// } else {
-		// 	$data['arTasks'] = array();
-		// }
-
+		$data['arRoles'] = Roles::whereIn('code', [User::ADMIN, User::MANAGER])->get()->pluck('name', 'id')->toArray();
 		$data['arTasks'] = Tasks::with('tasksAssignTo')->with('tasksCreatedBy')->with('tasksApprovedBy')->where('parent_id', '=', 0)->get()->keyBy('id')->toArray();
 
 		foreach ($data['arTasks'] as $taskId => $task) {
@@ -40,7 +33,17 @@ class TaskController extends BaseController
 
 			// Gán giá trị biến kiểm tra `hasChildren` vào nhiệm vụ hiện tại
 			$data['arTasks'][$taskId]['hasChildren'] = $hasChildren;
+
+			// Calculate the level of the current task
+			$level = 0;
+			$parentId = $task['parent_id'];
+			while ($parentId != 0) {
+				$level++;
+				$parentId = Tasks::where('id', $parentId)->value('parent_id');
+			}
+			$data['arTasks'][$taskId]['level'] = $level;
 		}
+
 		$data['arProject'] = Projects::get()->pluck('name', 'id')->toArray();
 		$data['user_id'] = $user->id;
 
@@ -179,6 +182,18 @@ class TaskController extends BaseController
 
 			// Assign the value of `hasChildren` to the current task
 			$arTasks[$taskId]['hasChildren'] = $hasChildren;
+
+			// Calculate the level of the current task
+			$level = 0;
+			$parentId = $task['parent_id'];
+			$parentIds = [];
+			while ($parentId != 0) {
+				$level++;
+				$parentId = Tasks::where('id', $parentId)->value('parent_id');
+				$parentIds[] = $parentId;
+			}
+			$arTasks[$taskId]['level'] = $level;
+			$arTasks[$taskId]['parentIds'] = array_reverse($parentIds);
 		}
 
 		$html = view('tasks.render_child_tasks', ['arTasks' => $arTasks])->render();

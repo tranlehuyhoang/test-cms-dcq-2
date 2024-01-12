@@ -119,7 +119,7 @@
 
                                                                     ?>
                                                             <tr id="child_{{ $value['id'] }}"
-                                                                class="child_tasks_<?php echo $value['parent_id']; ?>">
+                                                                class="child_tasks_<?php echo $value['parent_id']; ?> child_tasks_level_<?php echo $value['level']; ?>">
                                                                 <td>
                                                                     <span class="ms-0">
                                                                         {!! $value['hasChildren']
@@ -236,9 +236,8 @@
                                             } else {
                                                 var element = $('i.fe-chevron-down#' + id);
 
-                                                $('tr.child_tasks_' + id).remove();
                                                 element.removeClass('fe-chevron-down').addClass('fe-chevron-right');
-
+                                                $('tr.child_tasks_' + id).remove();
                                             }
 
                                         }
