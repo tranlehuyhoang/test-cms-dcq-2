@@ -40,6 +40,7 @@ Route::get('tasks/{id}/edit', [TaskController::class, 'edit'])->name('task.edit'
 Route::post('tasks/update', [TaskController::class, 'update'])->name('task.update');
 Route::get('tasks/{parent_id}/add', [TaskController::class, 'add'])->name('task.add');
 Route::get('tasks/{id}', [TaskController::class, 'detail'])->name('task.detail');
+Route::post('tasks/get_child_tasks', [TaskController::class, 'get_child_tasks'])->name('task.get_child_tasks');
 
 // Người dùng
 Route::get('user/add', [UserController::class, 'add'])->name('user.add');

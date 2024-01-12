@@ -11,7 +11,8 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class User extends Authenticatable implements HasMedia {
+class User extends Authenticatable implements HasMedia
+{
     use HasApiTokens, HasFactory, Notifiable;
     use InteractsWithMedia;
 
@@ -56,7 +57,8 @@ class User extends Authenticatable implements HasMedia {
     const ADMIN = 'admin';
     const MANAGER = 'manager';
 
-    public function userRole() {
+    public function userRole()
+    {
         return $this->belongsTo(Roles::class, 'role_id');
     }
 }

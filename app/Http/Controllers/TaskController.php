@@ -34,6 +34,13 @@ class TaskController extends BaseController
 
 		$data['arTasks'] = Tasks::with('tasksAssignTo')->with('tasksCreatedBy')->with('tasksApprovedBy')->where('parent_id', '=', 0)->get()->keyBy('id')->toArray();
 
+		foreach ($data['arTasks'] as $taskId => $task) {
+			// Kiểm tra xem có nhiệm vụ con với parent_id = task.id hay không
+			$hasChildren = Tasks::where('parent_id', '=', $taskId)->exists();
+
+			// Gán giá trị biến kiểm tra `hasChildren` vào nhiệm vụ hiện tại
+			$data['arTasks'][$taskId]['hasChildren'] = $hasChildren;
+		}
 		$data['arProject'] = Projects::get()->pluck('name', 'id')->toArray();
 		$data['user_id'] = $user->id;
 
@@ -88,53 +95,7 @@ class TaskController extends BaseController
 		return view('tasks.detail', $data);
 	}
 
-	// public function detail(Request $request)
-	// {
-	// 	$user = Auth::user();
 
-	// 	$data = array();
-
-	// 	$data['task'] = Tasks::with('tasksAssignTo')->with('tasksCreatedBy')->with('tasksApprovedBy')->where('id', '=', $request->id)->get()->toArray();
-
-	// 	$data['arChildTasks'] = Tasks::with('tasksAssignTo')->with('tasksCreatedBy')->with('tasksApprovedBy')->where('parent_id', '=', $request->id)->get()->toArray();
-
-	// 	$data['arStatus'] = Tasks::STATUS;
-	// 	$data['arPriority'] = Tasks::PRIORITY;
-	// 	$data['task_id'] = $request->id;
-
-	// 	$data['taskComments'] = TaskComment::where('task_id', '=', $request->id)->get();
-
-	// 	$data['users'] = User::whereIn('id', $data['taskComments']->pluck('create_by'))->get();
-	// 	$data['user_id'] =  Auth::user()->id;
-
-	// 	$data['taskComments'] = TaskComment::with('user')
-	// 		->where('task_id', $request->id)
-	// 		->where('reply_id', 0)
-	// 		->orderBy('created_at', 'desc')
-	// 		->get();
-
-	// 	// Chuyển đổi múi giờ và định dạng thời gian cho mỗi TaskComment
-	// 	foreach ($data['taskComments'] as $taskComment) {
-	// 		$createdDate = \Carbon\Carbon::parse($taskComment->created_at)->setTimezone('Asia/Ho_Chi_Minh');
-	// 		$taskComment->diffForHumansInVietnam = $createdDate->diffForHumans();
-	// 	}
-	// 	$data['taskCommentsWithReplys'] = TaskComment::with('user')
-	// 		->where('task_id', $request->id)
-	// 		->where('reply_id', '!=', 0)
-	// 		->orderBy('created_at', 'asc')
-	// 		->get();
-
-	// 	// Chuyển đổi múi giờ và định dạng thời gian cho mỗi TaskComment có reply_id khác 0
-	// 	foreach ($data['taskCommentsWithReplys'] as $taskComment) {
-	// 		$createdDate = \Carbon\Carbon::parse($taskComment->created_at)->setTimezone('Asia/Ho_Chi_Minh');
-	// 		$taskComment->diffForHumansInVietnam = $createdDate->diffForHumans();
-	// 	}
-
-	// 	$data['taskCommentss'] = TaskComment::where('task_id', '=', $request->id)->get();
-
-	// 	$data['commentCount'] = count($data['taskCommentss']);
-	// 	return view('tasks.detail', $data);
-	// }
 
 	public function add(Request $request)
 	{
@@ -200,5 +161,13 @@ class TaskController extends BaseController
 		}
 
 		return redirect()->route('task.detail', ['id' => $taskId]);
+	}
+	public function get_child_tasks(Request $request)
+	{
+		$id = $request->input('id');
+		$arTasks = Tasks::with('tasksAssignTo')->with('tasksCreatedBy')->with('tasksApprovedBy')->where('parent_id', '=', $id)->get()->keyBy('id')->toArray();
+		$html = view('tasks.render_child_tasks', ['arTasks' => $arTasks])->render();
+
+		return response()->json(['html' => $html], 200);
 	}
 }

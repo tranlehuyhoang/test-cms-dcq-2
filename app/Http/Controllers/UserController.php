@@ -16,20 +16,23 @@ use App\Models\Roles;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-class UserController extends BaseController {
-	public function loginForm() {
+class UserController extends BaseController
+{
+	public function loginForm()
+	{
 		if (Auth::check()) {
 			return redirect(route('dashboard'));
 		}
-		
+
 		return view('users.login-form');
 	}
 
-	public function index() {
+	public function index()
+	{
 		$data['arUsers'] = User::with('userRole')->get()->toArray();
 		$users = User::with('userRole')->get();
 
-		foreach($users as $user){
+		foreach ($users as $user) {
 			$data['avatarUsers'][$user->id] = User::find($user->id)->getMedia('avatar');
 		}
 
@@ -38,19 +41,22 @@ class UserController extends BaseController {
 		return view('users.index', $data);
 	}
 
-	public function add() {
+	public function add()
+	{
 		$data['arRole'] = Roles::get()->pluck('name', 'id')->toArray();
 		return view('users.add', $data);
 	}
 
-	public function edit(Request $request) {
+	public function edit(Request $request)
+	{
 		$data['user'] = User::with('userRole')->where('id', '=', $request->id)->get()->toArray();
 		$data['arRole'] = Roles::get()->pluck('name', 'id')->toArray();
 		$data['avatarUsers'][$request->id] = User::find($request->id)->getMedia('avatar');
 		return view('users.edit', $data);
 	}
 
-	public function login(Request $request) {
+	public function login(Request $request)
+	{
 		if (Auth::check()) {
 			return redirect(route('dashboard'));
 		}
@@ -65,11 +71,13 @@ class UserController extends BaseController {
 		return redirect()->back();
 	}
 
-	public function detail(Request $request) {
+	public function detail(Request $request)
+	{
 		return view('users.detail');
 	}
 
-	public function update(Request $request) {
+	public function update(Request $request)
+	{
 		if (empty($request->id)) {
 			$request->validate([
 				'name' => 'required',
@@ -89,13 +97,13 @@ class UserController extends BaseController {
 				"allowance" => $request->allowance
 			))->id;
 
-			if (isset($request->avatar) && !empty($request->avatar)){
+			if (isset($request->avatar) && !empty($request->avatar)) {
 				$user = User::findOrFail($id);
 				$user->addMedia($request->avatar)->toMediaCollection('avatar');
 			}
 		} else {
 			$user = User::find($request->id);
-			
+
 			$user->email = $request->email;
 			$user->name = $request->name;
 			$user->role_id = $request->role_id;
@@ -107,13 +115,12 @@ class UserController extends BaseController {
 
 			$user->save();
 
-			if(isset($request->avatar) && !empty($request->avatar)){
+			if (isset($request->avatar) && !empty($request->avatar)) {
 				$user->clearMediaCollection('avatar');
 				$user->addMedia($request->avatar)->toMediaCollection('avatar');
 			}
 		}
 
 		return redirect()->route('user.index');
-
 	}
 }
