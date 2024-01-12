@@ -165,7 +165,22 @@ class TaskController extends BaseController
 	public function get_child_tasks(Request $request)
 	{
 		$id = $request->input('id');
-		$arTasks = Tasks::with('tasksAssignTo')->with('tasksCreatedBy')->with('tasksApprovedBy')->where('parent_id', '=', $id)->get()->keyBy('id')->toArray();
+		$arTasks = Tasks::with('tasksAssignTo')
+			->with('tasksCreatedBy')
+			->with('tasksApprovedBy')
+			->where('parent_id', $id)
+			->get()
+			->keyBy('id')
+			->toArray();
+
+		foreach ($arTasks as $taskId => $task) {
+			// Check if there are child tasks with parent_id = $taskId
+			$hasChildren = Tasks::where('parent_id', $taskId)->exists();
+
+			// Assign the value of `hasChildren` to the current task
+			$arTasks[$taskId]['hasChildren'] = $hasChildren;
+		}
+
 		$html = view('tasks.render_child_tasks', ['arTasks' => $arTasks])->render();
 
 		return response()->json(['html' => $html], 200);

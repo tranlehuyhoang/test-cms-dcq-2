@@ -20,7 +20,11 @@ foreach ($arTasks as $key => $value) {
 
     ?>
  <tr id="child_tasks_<?php echo $value['parent_id']; ?>">
+
      <td>
+         <span class="ms-0">
+             {!! $value['hasChildren'] ? '<i class="fe-chevron-right" id="' . $value['id'] . '"></i>' : '' !!}
+         </span>
          <label class="form-check-label <?php echo $classStatus; ?>" for="tasktodayCheck01">#<?php echo $value['id']; ?></label>
      </td>
      <td>
