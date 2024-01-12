@@ -120,7 +120,7 @@
                                                                     ?>
                                                             <tr id="child_{{ $value['id'] }}">
                                                                 <td><span class="ms-0">
-                                                                        {!! $value['hasChildren'] ? '<i class="fe-chevron-down" id="' . $value['id'] . '"></i>' : '' !!}
+                                                                        {!! $value['hasChildren'] ? '<i class="fe-chevron-right" id="' . $value['id'] . '"></i>' : '' !!}
                                                                     </span>
                                                                     <label class="form-check-label <?php echo $classStatus; ?>"
                                                                         for="tasktodayCheck01">#<?php echo $value['id']; ?></label>
@@ -200,27 +200,47 @@
 
                                     <script>
                                         $(document).ready(function() {
-                                            $('i.fe-chevron-down').click(function() {
+                                            $('i.fe-chevron-right').click(function() {
                                                 var id = $(this).attr('id');
 
                                                 var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                                                var element = $('i.fe-chevron-right#' + id);
+                                                if (element.length > 0) {
 
-                                                $.ajax({
-                                                    url: '{{ route('task.get_child_tasks') }}',
-                                                    method: 'POST',
-                                                    data: {
-                                                        id: id,
-                                                        _token: csrfToken // Thêm mã CSRF vào yêu cầu
-                                                    },
-                                                    success: function(response) {
-                                                        var child_tasks = response.html;
-                                                        $('#child_' + id).append(child_tasks);
-                                                    }
-                                                    error: function(xhr, status, error) {
-                                                        // Xử lý lỗi
-                                                        console.error(error);
-                                                    }
-                                                });
+                                                    $.ajax({
+                                                        url: '{{ route('task.get_child_tasks') }}',
+                                                        method: 'POST',
+                                                        data: {
+                                                            id: id,
+                                                            _token: '{{ csrf_token() }}' // Thêm mã CSRF vào yêu cầu
+                                                        },
+                                                        success: function(response) {
+                                                            var child_tasks = response.html;
+                                                            $('#child_' + id).after(child_tasks);
+
+                                                            element.removeClass('fe-chevron-right').addClass('fe-chevron-down');
+                                                        },
+                                                        error: function(xhr, status, error) {
+                                                            // Xử lý lỗi
+                                                            console.error(error);
+                                                        }
+                                                    });
+                                                } else {
+                                                    console.log('object')
+                                                    $('tr#child_tasks_' + id).remove();
+                                                    var element = $('i.fe-chevron-down#' + id);
+
+                                                    element.removeClass('fe-chevron-down').addClass('fe-chevron-right');
+                                                }
+
+                                            });
+                                        });
+                                        $(document).ready(function() {
+                                            console.log('object')
+                                            $('i.fe-chevron-down').click(function() {
+                                                $(this).removeClass('fe-chevron-down').addClass('fe-chevron-right');
+
+
                                             });
                                         });
                                     </script>
